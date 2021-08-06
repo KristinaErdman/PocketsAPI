@@ -11,7 +11,8 @@ class CustomUser(AbstractUser):
         _('username'),
         max_length=20,
         unique=True,
-        help_text=_('Required. From 5 to 20 characters or fewer. Latin letters, digits and @/./+/-/_ only.'),
+        help_text=_('Required. From 5 to 20 characters or fewer. Latin letters, '
+                    'digits and @/./+/-/_ only.'),
         validators=[
             UnicodeUsernameValidator(),
             MinLengthValidator(5),
