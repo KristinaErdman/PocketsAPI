@@ -7,9 +7,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'rest_framework',
+    'rest_framework_simplejwt',
 ]
 
 LOCAL_APPS = [
+    'apps.users',
 ]
 
 INSTALLED_APPS += LOCAL_APPS
