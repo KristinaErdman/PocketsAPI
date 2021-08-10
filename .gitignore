@@ -9,4 +9,3 @@
 *.sql
 *.7z
 /pg_data
-/server/apps/users/tests.py

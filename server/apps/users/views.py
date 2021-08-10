@@ -4,12 +4,12 @@ from .serializers import UserCreateSerializer, UserRetrieveSerializer
 from .models import CustomUser
 
 
-class UserRegistration(CreateAPIView):
+class UserRegistrationView(CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserCreateSerializer
 
 
-class MeView(RetrieveAPIView):
+class UserInfoView(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = CustomUser.objects.all()
     serializer_class = UserRetrieveSerializer
