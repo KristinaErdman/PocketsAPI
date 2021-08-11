@@ -1,5 +1,5 @@
 from rest_framework import routers
-from .views import CategoryViewSet, TransactionViewSet
+from .viewsets import CategoryViewSet, TransactionViewSet
 
 
 router = routers.SimpleRouter()
