@@ -1,7 +1,6 @@
 from django.db import models
 from django.db.models import CASCADE, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
-import apps.users.models
 
 
 class Category(models.Model):
@@ -12,7 +11,7 @@ class Category(models.Model):
     )
     type = models.CharField(max_length=1, choices=TYPE, verbose_name='Тип')
     name = models.CharField(max_length=30, default=_('Other'), verbose_name='Название')
-    owner = models.ForeignKey(to=apps.users.models.CustomUser, on_delete=CASCADE, related_name='categories',
+    owner = models.ForeignKey(to='users.CustomUser', on_delete=CASCADE, related_name='categories',
                               verbose_name='Владелец')
 
     class Meta:

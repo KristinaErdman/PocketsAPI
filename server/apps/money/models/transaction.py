@@ -1,15 +1,13 @@
 from django.db import models
 from django.db.models import CASCADE
 from django.core.validators import MinValueValidator
-import apps.users.models
-from .category import Category
 
 
 class Transaction(models.Model):
     """Модель транзакции"""
-    owner = models.ForeignKey(to=apps.users.models.CustomUser, on_delete=CASCADE, related_name='transactions',
+    owner = models.ForeignKey(to='users.CustomUser', on_delete=CASCADE, related_name='transactions',
                               verbose_name='Владелец')
-    category = models.ForeignKey(Category, on_delete=CASCADE,  blank=True,
+    category = models.ForeignKey(to='money.Category', on_delete=CASCADE,  blank=True,
                                  null=True, related_name='transactions', verbose_name='Категория')
     amount = models.DecimalField(max_digits=10, decimal_places=2,
                                  validators=[MinValueValidator(0.1), ], verbose_name='Сумма')
