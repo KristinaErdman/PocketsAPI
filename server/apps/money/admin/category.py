@@ -1,5 +1,6 @@
 from django.contrib.admin import ModelAdmin, register, TabularInline
-from .models import Category, Transaction
+from ..models.category import Category
+from .transaction import TransactionInline
 
 
 class CategoryInline(TabularInline):
@@ -9,14 +10,6 @@ class CategoryInline(TabularInline):
     extra = 0
     show_change_link = True
     can_delete = False
-
-
-class TransactionInline(TabularInline):
-    model = Transaction
-    fk_name = 'category'
-    fields = ('date', 'amount')
-    ordering = ('-date', )
-    extra = 0
 
 
 @register(Category)

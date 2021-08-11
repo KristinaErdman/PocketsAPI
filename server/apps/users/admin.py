@@ -1,5 +1,5 @@
 from django.contrib.admin import ModelAdmin, register
-from apps.money.admin import CategoryInline
+from ..money.admin import CategoryInline
 from .models import CustomUser
 
 
