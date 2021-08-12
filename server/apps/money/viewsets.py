@@ -42,25 +42,13 @@ class TransactionViewSet(viewsets.ModelViewSet):
         self.serializer_class = TransactionListSerializer
         return super(TransactionViewSet, self).list(request, *args, **kwargs)
 
-    @action(methods=['get', ], detail=False)
-    def from_date_to_date(self, request):
-        start_date = self.request.query_params.get('start_date', None)
-        end_date = self.request.query_params.get('end_date', None)
-
-        if start_date is not None and end_date is None:
-            q_by_date = Q(date__gte=start_date)
-
-        if end_date is not None and start_date is None:
-            q_by_date = Q(date__lte=end_date)
-
-        if start_date is not None and end_date is not None:
-            q_by_date = Q(date__range=(start_date, end_date))
-
+    @action(methods=['get', ], detail=False, url_path='global')
+    def get_sum_income_and_expense(self, request):
         try:
             sum_by_categories = Transaction.objects.aggregate(
-                income=Coalesce(Sum('amount', filter=q_by_date & Q(category__type='i')), 0,
+                income=Coalesce(Sum('amount', filter=Q(category__type='i')), 0,
                                 output_field=DecimalField()),
-                expense=Coalesce(Sum('amount', filter=q_by_date & Q(category__type='e')), 0,
+                expense=Coalesce(Sum('amount', filter=Q(category__type='e')), 0,
                                  output_field=DecimalField()),
             )
             ser = CategorySumByTypeSerializer(sum_by_categories)
