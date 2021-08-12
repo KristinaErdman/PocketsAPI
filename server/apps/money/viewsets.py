@@ -1,8 +1,12 @@
+from django.db.models import Q, Sum, DecimalField
+from django.db.models.functions import Coalesce
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from .utils import Paginate
 from .models import Category, Transaction
-from .serializers import (CategorySerializer, CategoryListSerializer,
+from .serializers import (CategorySerializer, CategoryListSerializer, CategorySumByTypeSerializer,
                           TransactionSerializer, TransactionListSerializer)
 
 
@@ -37,3 +41,31 @@ class TransactionViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         self.serializer_class = TransactionListSerializer
         return super(TransactionViewSet, self).list(request, *args, **kwargs)
+
+    @action(methods=['get', ], detail=False)
+    def from_date_to_date(self, request):
+        start_date = self.request.query_params.get('start_date', None)
+        end_date = self.request.query_params.get('end_date', None)
+
+        if start_date is not None and end_date is None:
+            q_by_date = Q(date__gte=start_date)
+
+        if end_date is not None and start_date is None:
+            q_by_date = Q(date__lte=end_date)
+
+        if start_date is not None and end_date is not None:
+            q_by_date = Q(date__range=(start_date, end_date))
+
+        try:
+            sum_by_categories = Transaction.objects.aggregate(
+                income=Coalesce(Sum('amount', filter=q_by_date & Q(category__type='i')), 0,
+                                output_field=DecimalField()),
+                expense=Coalesce(Sum('amount', filter=q_by_date & Q(category__type='e')), 0,
+                                 output_field=DecimalField()),
+            )
+            ser = CategorySumByTypeSerializer(sum_by_categories)
+            response = Response(ser.data, status=HTTP_200_OK)
+        except Exception:
+            response = Response(status=HTTP_400_BAD_REQUEST)
+        finally:
+            return response
