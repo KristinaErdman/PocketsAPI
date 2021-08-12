@@ -3,7 +3,7 @@ from django.db.models.functions import Coalesce
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK
 from .utils import Paginate
 from .models import Category, Transaction
 from .serializers import (CategorySerializer, CategoryListSerializer, CategorySumByTypeSerializer,
@@ -44,16 +44,11 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get', ], detail=False, url_path='global')
     def get_sum_income_and_expense(self, request):
-        try:
-            sum_by_categories = Transaction.objects.aggregate(
-                income=Coalesce(Sum('amount', filter=Q(category__type='i')), 0,
-                                output_field=DecimalField()),
-                expense=Coalesce(Sum('amount', filter=Q(category__type='e')), 0,
-                                 output_field=DecimalField()),
-            )
-            ser = CategorySumByTypeSerializer(sum_by_categories)
-            response = Response(ser.data, status=HTTP_200_OK)
-        except Exception:
-            response = Response(status=HTTP_400_BAD_REQUEST)
-        finally:
-            return response
+        sum_by_categories = Transaction.objects.aggregate(
+            income=Coalesce(Sum('amount', filter=Q(category__type='i')), 0,
+                output_field=DecimalField()),
+            expense=Coalesce(Sum('amount', filter=Q(category__type='e')), 0,
+                output_field=DecimalField()),
+        )
+        ser = CategorySumByTypeSerializer(sum_by_categories)
+        return Response(ser.data, status=HTTP_200_OK)
