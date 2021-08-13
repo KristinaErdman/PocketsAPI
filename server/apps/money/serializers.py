@@ -1,6 +1,7 @@
-from django.db.models import Sum, DecimalField
+from django.db.models import Sum
 from django.db.models.functions import Coalesce
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from rest_framework.serializers import (Serializer, ModelSerializer,
+                                        SerializerMethodField, DecimalField)
 from .models import Category, Transaction
 
 
@@ -21,6 +22,11 @@ class CategoryListSerializer(ModelSerializer):
         res = obj.transactions.aggregate(sum=Coalesce(Sum('amount'), 0.0,
                                                       output_field=DecimalField()))
         return res['sum']
+
+
+class CategorySumByTypeSerializer(Serializer):
+    income = DecimalField(read_only=True, max_digits=12, decimal_places=2)
+    expense = DecimalField(read_only=True, max_digits=12, decimal_places=2)
 
 
 class TransactionSerializer(ModelSerializer):

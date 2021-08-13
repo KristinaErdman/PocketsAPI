@@ -1,8 +1,12 @@
+from django.db.models import Q, Sum, DecimalField
+from django.db.models.functions import Coalesce
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK
 from .utils import Paginate
 from .models import Category, Transaction
-from .serializers import (CategorySerializer, CategoryListSerializer,
+from .serializers import (CategorySerializer, CategoryListSerializer, CategorySumByTypeSerializer,
                           TransactionSerializer, TransactionListSerializer)
 
 
@@ -37,3 +41,14 @@ class TransactionViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         self.serializer_class = TransactionListSerializer
         return super(TransactionViewSet, self).list(request, *args, **kwargs)
+
+    @action(methods=['get', ], detail=False, url_path='global')
+    def get_sum_income_and_expense(self, request):
+        sum_by_categories = Transaction.objects.aggregate(
+            income=Coalesce(Sum('amount', filter=Q(category__type='i')), 0,
+                output_field=DecimalField()),
+            expense=Coalesce(Sum('amount', filter=Q(category__type='e')), 0,
+                output_field=DecimalField()),
+        )
+        ser = CategorySumByTypeSerializer(sum_by_categories)
+        return Response(ser.data, status=HTTP_200_OK)
