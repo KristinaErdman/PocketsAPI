@@ -1,4 +1,4 @@
-from django.db.models import Q, F, Sum, DecimalField
+from django.db.models import Q, Sum, DecimalField
 from django.db.models.functions import Coalesce
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -23,19 +23,8 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get', ], detail=False, url_path='summary')
     def get_sum_amount(self, request):
-        fs = DateFilterSet(self.request.GET, request=self.request,
-                           queryset=Transaction.objects.all())
-        transactions = fs.qs  # отфильтрованные по дате транзакции
-        transactions = transactions.values('category').annotate(
-            pk=F('category'),
-            type=F('category__type'),
-            name=F('category__name'),
-            owner=F('category__owner'),
-            sum_amount=Coalesce(Sum('amount'), 0.0, output_field=DecimalField()),
-        )  # отфильтрованные по дате транзакции
-
-        ser = CategoryListSerializer(transactions, many=True)
-        return Response(ser.data, status=HTTP_200_OK)
+        self.serializer_class = CategoryListSerializer
+        return self.list(request)
 
 
 class TransactionViewSet(viewsets.ModelViewSet):
