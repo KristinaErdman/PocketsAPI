@@ -8,6 +8,7 @@ from .utils import Paginate
 from .models import Category, Transaction
 from .serializers import (CategorySerializer, CategoryListSerializer, CategorySumByTypeSerializer,
                           TransactionSerializer, TransactionListSerializer)
+from .filtersets import DateFilterSet
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -20,7 +21,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
 
-    @action(methods=['get', ], detail=False, url_path='with_sum')
+    @action(methods=['get', ], detail=False, url_path='summary')
     def get_sum_amount(self, request):
         self.serializer_class = CategoryListSerializer
         return self.list(request)
@@ -36,6 +37,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
     """
     serializer_class = TransactionSerializer
     queryset = Transaction.objects.all()
+    filterset_class = DateFilterSet
     pagination_class = Paginate
 
     def list(self, request, *args, **kwargs):
@@ -44,7 +46,8 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get', ], detail=False, url_path='global')
     def get_sum_income_and_expense(self, request):
-        sum_by_categories = Transaction.objects.aggregate(
+        sum_by_categories = self.filter_queryset(self.queryset)
+        sum_by_categories = sum_by_categories.aggregate(
             income=Coalesce(Sum('amount', filter=Q(category__type='i')), 0,
                 output_field=DecimalField()),
             expense=Coalesce(Sum('amount', filter=Q(category__type='e')), 0,
@@ -52,3 +55,4 @@ class TransactionViewSet(viewsets.ModelViewSet):
         )
         ser = CategorySumByTypeSerializer(sum_by_categories)
         return Response(ser.data, status=HTTP_200_OK)
+
