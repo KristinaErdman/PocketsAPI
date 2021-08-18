@@ -60,7 +60,6 @@ class WidgetSerializer(serializers.ModelSerializer):
         read_only_fields = ('expiry_date',)
 
 
-
 class WidgetListSerializer(serializers.ModelSerializer):
     current_sum = serializers.SerializerMethodField()
 

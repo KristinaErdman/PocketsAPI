@@ -4,13 +4,13 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
-from rest_framework.permissions import IsAuthenticated
 from .models import Category, Transaction, Widget
 from .utils import Paginate
 from .serializers import (CategorySerializer, CategoryListSerializer, CategorySumByTypeSerializer,
                           TransactionSerializer, TransactionListSerializer,
                           WidgetSerializer, WidgetListSerializer)
 from .filtersets import DateFilterSet
+from .permissions import IsOwnerOrStaff
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -20,7 +20,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     по адресу /with_sum/ и методе GET выводит список всех категорий с суммой транзакций по ним,
     при получении метода DELETE И id удаляет категорию с указанным id
     """
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsOwnerOrStaff, ]
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
 
@@ -46,7 +46,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
         при получении метода DELETE И id удаляет транзакцию с указанным id,
         при получении метода PATCH И id обновляет транзакцию с указанным id,
     """
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsOwnerOrStaff, ]
     serializer_class = TransactionSerializer
     filterset_class = DateFilterSet
     pagination_class = Paginate
@@ -77,7 +77,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
 
 class WidgetViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsOwnerOrStaff, ]
     serializer_class = WidgetSerializer
 
     def get_queryset(self):
