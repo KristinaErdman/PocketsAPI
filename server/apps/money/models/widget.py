@@ -28,6 +28,7 @@ class Widget(models.Model):
     color = models.CharField(max_length=7, validators=[RegexValidator(r'#[a-f\d]{6}'), ],
                              default='#FF0000', verbose_name='Цвет(hex)')
     created_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    expiry_date = models.DateTimeField(verbose_name='Дата окончания цели')
 
     class Meta:
         verbose_name = 'Виджет'
@@ -35,3 +36,8 @@ class Widget(models.Model):
 
     def __str__(self):
         return f'тратить на {self.category} {self.condition} {self.limit} рублей'
+
+    def save(self, *args, **kwargs):
+        super(Widget, self).save(*args, **kwargs)
+        self.expiry_date = self.created_date + self.duration
+        super(Widget, self).save(update_fields=['expiry_date', ])

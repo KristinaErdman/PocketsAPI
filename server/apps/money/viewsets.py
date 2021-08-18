@@ -10,6 +10,7 @@ from .serializers import (CategorySerializer, CategoryListSerializer, CategorySu
                           TransactionSerializer, TransactionListSerializer,
                           WidgetSerializer, WidgetListSerializer)
 from .filtersets import DateFilterSet
+from .permissions import IsOwnerOrStaff
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -19,8 +20,17 @@ class CategoryViewSet(viewsets.ModelViewSet):
     по адресу /with_sum/ и методе GET выводит список всех категорий с суммой транзакций по ним,
     при получении метода DELETE И id удаляет категорию с указанным id
     """
+    permission_classes = [IsOwnerOrStaff, ]
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
+
+    def get_queryset(self):
+        self.queryset = Category.objects.filter(owner=self.request.user)
+        return self.queryset
+
+    def perform_create(self, serializer):
+        serializer.validated_data['owner'] = self.request.user
+        super(CategoryViewSet, self).perform_create(serializer)
 
     @action(methods=['get', ], detail=False, url_path='summary')
     def get_sum_amount(self, request):
@@ -36,10 +46,18 @@ class TransactionViewSet(viewsets.ModelViewSet):
         при получении метода DELETE И id удаляет транзакцию с указанным id,
         при получении метода PATCH И id обновляет транзакцию с указанным id,
     """
+    permission_classes = [IsOwnerOrStaff, ]
     serializer_class = TransactionSerializer
-    queryset = Transaction.objects.all()
     filterset_class = DateFilterSet
     pagination_class = Paginate
+
+    def get_queryset(self):
+        self.queryset = Transaction.objects.filter(owner=self.request.user)
+        return self.queryset
+
+    def perform_create(self, serializer):
+        serializer.validated_data['owner'] = self.request.user
+        super(TransactionViewSet, self).perform_create(serializer)
 
     def list(self, request, *args, **kwargs):
         self.serializer_class = TransactionListSerializer
@@ -59,8 +77,16 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
 
 class WidgetViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsOwnerOrStaff, ]
     serializer_class = WidgetSerializer
-    queryset = Widget.objects.all()
+
+    def get_queryset(self):
+        self.queryset = Widget.objects.filter(owner=self.request.user)
+        return self.queryset
+
+    def perform_create(self, serializer):
+        serializer.validated_data['owner'] = self.request.user
+        super(WidgetViewSet, self).perform_create(serializer)
 
     def list(self, request, *args, **kwargs):
         self.serializer_class = WidgetListSerializer

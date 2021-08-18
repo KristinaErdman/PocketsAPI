@@ -6,7 +6,7 @@ router = routers.SimpleRouter()
 
 router.register(r'categories', CategoryViewSet, basename='category')
 router.register(r'transactions', TransactionViewSet, basename='transaction')
-router.register(r'widgets', WidgetViewSet, basename='widgets')
+router.register(r'widgets', WidgetViewSet, basename='widget')
 
 
 urlpatterns = router.urls
