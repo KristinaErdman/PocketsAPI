@@ -105,28 +105,13 @@ class GetCategoryTransactionWidgetFromUser(APITestCase):
 
     def test_get_all_transactions(self):
         """при запросе списка транзакций получаем только свои"""
-        #TODO: разобраться как собрать данные со всех страниц
-
-        # url = reverse('transaction-list')
-        # response = self.client.get(url)
-        # serializer_data = TransactionListSerializer(Transaction.objects.filter(owner=self.user),
-        #                                             many=True).data
-        # self.assertTrue(status.is_success(response.status_code))
-        # # print('serializer_data', type(serializer_data), len(serializer_data))
-        # # for d in serializer_data:
-        # #     print(d)
-        # results = list()
-        # print(response.data)
-        # # next = response.data['next']
-        # # while next is not None:
-        # #     print(next)
-        # #     resp = self.client.get(next)
-        # #     results.extend(resp.data['results'])
-        # #     next = resp.data['next']
-        # # print('response.data', type(response.data), len(response.data))
-        # # for d in results:
-        # #     print(d)
-        # self.assertEqual(response.data, serializer_data)
+        url = reverse('transaction-list')
+        response = self.client.get(url)
+        result = response.data['results']
+        serializer_data = TransactionListSerializer(Transaction.objects.filter(owner=self.user),
+                                                    many=True).data
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertEqual(result, serializer_data)
 
     def test_get_all_widgets(self):
         """при запросе списка виджетов получаем только свои"""
