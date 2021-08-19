@@ -20,6 +20,8 @@ def bash():
 def shell():
     local("docker exec -it $(docker ps | grep server_ | awk '{{ print $1 }}') python manage.py shell")
 
+def test():
+    local("docker exec -it $(docker ps | grep server_ | awk '{{ print $1 }}') python manage.py test")
 
 def dev():
     local("docker-compose run --rm --service-ports server")
