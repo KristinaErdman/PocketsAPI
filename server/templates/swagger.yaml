@@ -1,0 +1,848 @@
+swagger: '2.0'
+info:
+  title: Pockets
+  description: "Pockets - приложение для учета средств и получении простой аналитики /по категориям расходов и доходов."
+  contact:
+    email: pockets@dev.ru
+  license:
+    name: BSD License
+  version: 1.0.0
+host: 0.0.0.0:8000
+schemes:
+  - http
+basePath: /api
+consumes:
+  - application/json
+produces:
+  - application/json
+
+securityDefinitions:
+  Basic:
+    type: basic
+  JWT:
+    type: apiKey
+    name: Authorization
+    in: header
+security:
+  - Basic: []
+  - JWT: []
+paths:
+  /money/categories/:
+    get:
+      operationId: money_categories_list
+      description: "Получение списка всех категорий текущего авторизованного пользователя"
+      parameters: []
+      responses:
+        '200':
+          description: "OK"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Category'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/categories
+    post:
+      operationId: money_categories_create
+      description: "Создание новой категории для текущего авторизованного пользователя"
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Category'
+      responses:
+        '201':
+          description: 'Created'
+          schema:
+            $ref: '#/definitions/Category'
+        '401':
+          description: 'Unauthorized'
+        '500':
+          description: 'Internal Server Error. Возникает при попытке добавления категории, уже имеющейся у данного пользователя'
+      tags:
+        # - money
+        - money/categories
+    parameters: []
+  /money/categories/{id}/:
+    get:
+      operationId: money_categories_read
+      description: "Получение категории с указанным id"
+      parameters: []
+      responses:
+        '200':
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Category'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/categories
+    put:
+      operationId: money_categories_update
+      description: "Полное обновление категории с указанным id"
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Category'
+      responses:
+        '200':
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Category'
+        '401':
+          description: 'Unauthorized'
+        '400':
+          description: 'Bad Request. Type - обязательное поле.'
+      tags:
+        # - money
+        - money/categories
+    patch:
+      operationId: money_categories_partial_update
+      description: "Частичное обновление категории с указанным id"
+      parameters:
+        - name: data
+          in: body
+          required: false
+          schema:
+            $ref: '#/definitions/Category'
+      responses:
+        '200':
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Category'
+      tags:
+        # - money
+        - money/categories
+    delete:
+      operationId: money_categories_delete
+      description: "Удвление категории с указанным id"
+      parameters: []
+      responses:
+        '204':
+          description: 'No Content'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/categories
+    parameters:
+      - name: id
+        in: path
+        description: "A unique integer value identifying this \u041A\u0430\u0442\u0435\
+          \u0433\u043E\u0440\u0438\u044F."
+        required: true
+        type: integer
+  /money/categories/summary/:
+    get:
+      operationId: money_categories_get_sum_amount
+      description: "Получение списка всех категорий текущего авторизованного пользователя с суммой транзакций по каждой категории. Если указаны параметры start_date и(или) end_date, при подсчете учитываются только транзакции из указанного периода."
+      parameters:
+        - name: start_date
+          in: query
+          description: 'YYYY-MM-DD'
+          required: false
+          type: string
+        - name: end_date
+          in: query
+          description: 'YYYY-MM-DD'
+          required: false
+          type: string
+      responses:
+        '200':
+          description: 'OK'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Category_summary'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/categories/summary
+    parameters: []
+  /money/transactions/:
+    get:
+      operationId: money_transactions_list
+      description: "Получение списка всех транзакций текущего авторизованного пользователя"
+      parameters:
+        - name: start_date
+          in: query
+          description: 'YYYY-MM-DD'
+          required: false
+          type: string
+        - name: end_date
+          in: query
+          description: 'YYYY-MM-DD'
+          required: false
+          type: string
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: 'OK'
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Transaction'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/transactions
+    post:
+      operationId: money_transactions_create
+      description: "Добавление транзакции текущего авторизованного пользователя"
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Transaction_post_put'
+      responses:
+        '201':
+          description: 'Created'
+          schema:
+            $ref: '#/definitions/Transaction_detail'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/transactions
+    parameters: []
+  /money/transactions/global/:
+    get:
+      operationId: money_transactions_get_sum_income_and_expense
+      description: "Получение сумм всех доходных и расходных транзакций текущего авторизованного пользователя. Если указаны параметры start_date и(или) end_date, при подсчете учитываются только транзакции из указанного периода."
+      parameters:
+        - name: start_date
+          in: query
+          description: 'YYYY-MM-DD'
+          required: false
+          type: string
+        - name: end_date
+          in: query
+          description: 'YYYY-MM-DD'
+          required: false
+          type: string
+      responses:
+        '200':
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Transaction_global'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/transactions/global
+    parameters: []
+  /money/transactions/{id}/:
+    get:
+      operationId: money_transactions_read
+      description: "Получение транзакции с указанным id"
+      parameters: []
+      responses:
+        '200':
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Transaction_detail'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/transactions
+    put:
+      operationId: money_transactions_update
+      description: "Полное обновление транзакции с указанным id"
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Transaction'
+      responses:
+        '200':
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Transaction'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/transactions
+    patch:
+      operationId: money_transactions_partial_update
+      description: "Частичное обновление транзакции с указанным id"
+      parameters:
+        - name: data
+          in: body
+          required: false
+          schema:
+            $ref: '#/definitions/Transaction'
+      responses:
+        '200':
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Transaction'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/transactions
+    delete:
+      operationId: money_transactions_delete
+      description: "Удаление транзакции с указанным id"
+      parameters: []
+      responses:
+        '204':
+          description: 'No Content'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/transactions
+    parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+  /money/widgets/:
+    get:
+      operationId: money_widgets_list
+      description: "Получение списка всех виджетов текущего авторизованного пользователя"
+      parameters: []
+      responses:
+        '200':
+          description: 'OK'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Widget_list'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/widgets
+    post:
+      operationId: money_widgets_create
+      description: "Добавление виджета текущего авторизованного пользователя"
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Widget'
+      responses:
+        '201':
+          description: 'Created'
+          schema:
+            $ref: '#/definitions/Widget'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/widgets
+    parameters: [] 
+  /money/widgets/{id}/:
+    get:
+      operationId: money_widgets_read
+      description: "Получение виджета текущего авторизованного пользователя с указанным id"
+      parameters: []
+      responses:
+        '200':
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Widget'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/widgets
+    put:
+      operationId: money_widgets_update
+      description: "Полное обновление виджета текущего авторизованного пользователя с указанным id"
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Widget'
+      responses:
+        '200':
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Widget'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/widgets
+    patch:
+      operationId: money_widgets_partial_update
+      description: "Частичное обновление виджета текущего авторизованного пользователя с указанным id"
+      parameters:
+        - name: data
+          in: body
+          required: false
+          schema:
+            $ref: '#/definitions/Widget'
+      responses:
+        '200':
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/Widget'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/widgets
+    delete:
+      operationId: money_widgets_delete
+      description: "Удаление виджета текущего авторизованного пользователя с указанным id"
+      parameters: []
+      responses:
+        '204':
+          description: 'No Content'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        # - money
+        - money/widgets
+    parameters:
+      - name: id
+        in: path
+        required: true
+        type: string
+  /users/me/:
+    get:
+      operationId: users_me_read
+      description: "Получение информации о текущем авторизованном пользователе"
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          description: "JWT 'access token'"
+          required: true
+      responses:
+        '200':
+          description: 'OK'
+          schema:
+            $ref: '#/definitions/UserRetrieve'
+        '401':
+          description: 'Unauthorized'
+      tags:
+        - users
+    parameters: []
+  /users/sign_in/:
+    post:
+      operationId: users_sign_in_create
+      description: "Принимает набор учетных данных пользователя и возвращает пару веб-токенов доступа (access) и обновления (refresh) JSON, чтобы подтвердить аутентификацию этих учетных данных."
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UserSignIn'
+      responses:
+        '201':
+          description: 'Created'
+          schema:
+            $ref: '#/definitions/TokenObtainPair'
+      tags:
+        - users
+    parameters: []
+  /users/sign_up/:
+    post:
+      operationId: users_sign_up_create
+      description: "Регистрация пользователя"
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UserCreate'
+      responses:
+        '201':
+          description: 'Created'
+          schema:
+            $ref: '#/definitions/UserCreate'
+      tags:
+        - users
+    parameters: []
+  /users/token/refresh/:
+    post:
+      operationId: users_token_refresh_create
+      description: "Обновляет токен доступа (access)"
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TokenRefresh'
+      responses:
+        '200':
+          description: 'OK'
+          schema:
+            type: object
+            properties:
+              access:
+                title: Access token
+                type: string
+                readOnly: true
+      tags:
+        - users
+    parameters: []
+definitions:
+  Category:
+    required:
+      - type
+    type: object
+    properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
+      type:
+        title: "\u0422\u0438\u043F"
+        type: string
+        enum:
+          - i
+          - e
+      name:
+        title: "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435"
+        type: string
+        maxLength: 30
+        minLength: 1
+  Category_summary:
+    required:
+      - type
+    type: object
+    properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
+      type:
+        title: "\u0422\u0438\u043F"
+        type: string
+        enum:
+          - i
+          - e
+      name:
+        title: "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435"
+        type: string
+        maxLength: 30
+        minLength: 1
+      sum_amount:
+        title: 'сумма транзакций по данной категории'
+        type: number
+        format: decimal
+        readOnly: true
+  Transaction:
+    required:
+      - amount
+      - date
+    type: object
+    properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
+      category:
+        title: "\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u044F"
+        type: integer
+        x-nullable: true
+      amount:
+        title: "\u0421\u0443\u043C\u043C\u0430"
+        type: string
+        format: decimal
+      date:
+        title: "\u0414\u0430\u0442\u0430 \u043E\u043F\u0435\u0440\u0430\u0446\u0438\
+          \u0438"
+        type: string
+        format: date
+      type:
+        title: "\u0422\u0438\u043F"
+        type: string
+        enum:
+          - i
+          - e
+  Transaction_detail:
+    required:
+      - amount
+      - date
+    type: object
+    properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
+      category:
+        title: "\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u044F"
+        type: integer
+        x-nullable: true
+      amount:
+        title: "\u0421\u0443\u043C\u043C\u0430"
+        type: string
+        format: decimal
+      date:
+        title: "\u0414\u0430\u0442\u0430 \u043E\u043F\u0435\u0440\u0430\u0446\u0438\
+          \u0438"
+        type: string
+        format: date
+  Transaction_post_put:
+    required:
+      - amount
+      - date
+    type: object
+    properties:
+      category:
+        title: "\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u044F"
+        type: integer
+        x-nullable: true
+      amount:
+        title: "\u0421\u0443\u043C\u043C\u0430"
+        type: string
+        format: decimal
+      date:
+        title: "\u0414\u0430\u0442\u0430 \u043E\u043F\u0435\u0440\u0430\u0446\u0438\
+          \u0438"
+        type: string
+        format: date
+  Transaction_global:
+      required:
+      - income
+      - expense
+      type: object
+      properties:
+        income:
+          title: "\u0421\u0443\u043C\u043C\u0430"
+          type: string
+          format: decimal
+        expense:
+          title: "\u0421\u0443\u043C\u043C\u0430"
+          type: string
+          format: decimal
+  Widget:
+    required:
+      - category
+      - limit
+      - duration
+      - condition
+    type: object
+    properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
+      category:
+        title: "\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u044F"
+        type: integer
+      limit:
+        title: "\u041B\u0438\u043C\u0438\u0442 \u0441\u0443\u043C\u043C\u044B, \u043A\
+          \u043E\u0442\u043E\u0440\u0443\u044E \u043C\u043E\u0436\u043D\u043E \u043F\
+          \u043E\u0442\u0440\u0430\u0442\u0438\u0442\u044C"
+        type: string
+        format: decimal
+      duration:
+        title: "\u0421\u0440\u043E\u043A \u0434\u0435\u0439\u0441\u0442\u0432\u0438\
+          \u044F"
+        type: integer
+        enum:
+          - '86400.0'
+          - '604800.0'
+          - '2592000.0'
+      condition:
+        title: "\u041A\u0440\u0438\u0442\u0435\u0440\u0438\u0439 (\u0431\u043E\u043B\
+          \u044C\u0448\u0435, \u043C\u0435\u043D\u044C\u0448\u0435)"
+        type: string
+        enum:
+          - m
+          - l
+      color:
+        title: "\u0426\u0432\u0435\u0442(hex)"
+        type: string
+        pattern: '#[a-f\d]{6}'
+        maxLength: 7
+        minLength: 1
+      created_date:
+        title: "\u0414\u0430\u0442\u0430 \u0441\u043E\u0437\u0434\u0430\u043D\u0438\
+          \u044F"
+        type: string
+        format: date-time
+        readOnly: true
+      expiry_date:
+        title: "\u0414\u0430\u0442\u0430 \u043E\u043A\u043E\u043D\u0447\u0430\u043D\
+          \u0438\u044F \u0446\u0435\u043B\u0438"
+        type: string
+        format: date-time
+        readOnly: true
+  Widget_list:
+    required:
+      - category
+      - limit
+      - duration
+      - condition
+    type: object
+    properties:
+      pk:
+        title: ID
+        type: integer
+        readOnly: true
+      category:
+        title: "\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u044F"
+        type: integer
+      limit:
+        title: "\u041B\u0438\u043C\u0438\u0442 \u0441\u0443\u043C\u043C\u044B, \u043A\
+          \u043E\u0442\u043E\u0440\u0443\u044E \u043C\u043E\u0436\u043D\u043E \u043F\
+          \u043E\u0442\u0440\u0430\u0442\u0438\u0442\u044C"
+        type: string
+        format: decimal
+      duration:
+        title: "\u0421\u0440\u043E\u043A \u0434\u0435\u0439\u0441\u0442\u0432\u0438\
+          \u044F"
+        type: integer
+        enum:
+          - '86400.0'
+          - '604800.0'
+          - '2592000.0'
+      condition:
+        title: "\u041A\u0440\u0438\u0442\u0435\u0440\u0438\u0439 (\u0431\u043E\u043B\
+          \u044C\u0448\u0435, \u043C\u0435\u043D\u044C\u0448\u0435)"
+        type: string
+        enum:
+          - m
+          - l
+      color:
+        title: "\u0426\u0432\u0435\u0442(hex)"
+        type: string
+        pattern: '#[a-f\d]{6}'
+        maxLength: 7
+        minLength: 1
+      created_date:
+        title: "\u0414\u0430\u0442\u0430 \u0441\u043E\u0437\u0434\u0430\u043D\u0438\
+          \u044F"
+        type: string
+        format: date-time
+        readOnly: true
+      expiry_date:
+        title: "\u0414\u0430\u0442\u0430 \u043E\u043A\u043E\u043D\u0447\u0430\u043D\
+          \u0438\u044F \u0446\u0435\u043B\u0438"
+        type: string
+        format: date-time
+        readOnly: true
+      current_sum:
+        title: 'сумма транзакций по данному виджету'
+        type: number
+        format: decimal
+        readOnly: true
+  UserRetrieve:
+    required:
+      - username
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      username:
+        title: "\u0418\u043C\u044F \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\
+          \u0442\u0435\u043B\u044F"
+        description: Required. From 5 to 20 characters or fewer. Latin letters, digits
+          and @/./+/-/_ only.
+        type: string
+        maxLength: 20
+        minLength: 5
+  TokenObtainPair:
+    required:
+      - refresh
+      - access
+    type: object
+    properties:
+      refresh:
+        title: refresh token
+        type: string
+        minLength: 1
+      access:
+        title: access token
+        type: string
+        minLength: 1
+  UserSignIn:
+    required:
+      - email
+      - password
+    type: object
+    properties:
+      email:
+        title: email
+        type: string
+        minLength: 1
+      password:
+        title: password
+        type: string
+        minLength: 1
+  UserCreate:
+    required:
+      - username
+      - email
+      - password
+    type: object
+    properties:
+      username:
+        title: "\u0418\u043C\u044F \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\
+          \u0442\u0435\u043B\u044F"
+        description: Required. From 5 to 20 characters or fewer. Latin letters, digits
+          and @/./+/-/_ only.
+        type: string
+        maxLength: 20
+        minLength: 5
+      email:
+        title: "\u0410\u0434\u0440\u0435\u0441 \u044D\u043B\u0435\u043A\u0442\u0440\
+          \u043E\u043D\u043D\u043E\u0439 \u043F\u043E\u0447\u0442\u044B"
+        type: string
+        format: email
+        maxLength: 254
+        minLength: 1
+      password:
+        title: "\u041F\u0430\u0440\u043E\u043B\u044C"
+        type: string
+        maxLength: 128
+        minLength: 1
+  TokenRefresh:
+    required:
+      - refresh
+    type: object
+    properties:
+      refresh:
+        title: Refresh token
+        type: string
+        minLength: 1
+      access:
+        title: Access token
+        type: string
+        readOnly: true
+

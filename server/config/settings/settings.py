@@ -141,7 +141,8 @@ REST_FRAMEWORK = {
 # Simple JWT
 ##################################################################
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # время жизни access токена
+    # 'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # время жизни access токена
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # время жизни refresh токена
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -191,3 +192,20 @@ if DEBUG:
     }
     MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
     INSTALLED_APPS += ['debug_toolbar']
+
+
+##################################################################
+# Swagger
+##################################################################
+SWAGGER_SETTINGS = {
+   'SECURITY_DEFINITIONS': {
+      'Basic': {
+            'type': 'basic'
+      },
+      'JWT': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+      }
+   }
+}

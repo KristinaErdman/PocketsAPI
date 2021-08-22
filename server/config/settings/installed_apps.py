@@ -9,6 +9,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
+    'drf_yasg',
 ]
 
 LOCAL_APPS = [

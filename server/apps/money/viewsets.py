@@ -34,6 +34,9 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get', ], detail=False, url_path='summary')
     def get_sum_amount(self, request):
+        """Получение списка всех категорий текущего авторизованного пользователя
+        с суммой транзакций по каждой категории. Если указаны параметры start_date и(или) end_date,
+        при подсчете учитываются только транзакции из указанного периода."""
         self.serializer_class = CategoryListSerializer
         return self.list(request)
 
