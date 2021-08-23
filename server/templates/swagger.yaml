@@ -473,7 +473,7 @@ paths:
           schema:
             $ref: '#/definitions/TokenObtainPair'
       tags:
-        - users
+        - users/auth
     parameters: []
   /users/sign_up/:
     post:
@@ -491,7 +491,7 @@ paths:
           schema:
             $ref: '#/definitions/UserCreate'
       tags:
-        - users
+        - users/auth
     parameters: []
   /users/token/refresh/:
     post:
@@ -514,7 +514,7 @@ paths:
                 type: string
                 readOnly: true
       tags:
-        - users
+        - users/auth
     parameters: []
 definitions:
   Category:
